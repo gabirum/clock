@@ -27,12 +27,19 @@ const cartesianToPolar = (x, y) => [
 ];
 const polarToCartesian = (r, a) => [r * Math.cos(a), r * Math.sin(a)];
 
-const setPosition = (svgText, svgLine, ring, angle) => {
+const setPosition = (svgText, svgLine, ring, angle, over = false) => {
   const x = BOX_CENTER + ring * Math.sin(angle);
   const y = BOX_CENTER - ring * Math.cos(angle);
 
   svgText.setAttribute("x", x - FONT_CORRECTION);
-  svgText.setAttribute("y", y + FONT_CORRECTION);
+  svgText.setAttribute("y", y + FONT_CORRECTION / 2);
+
+  if (over) {
+    svgLine.setAttribute("stroke-width", 0);
+    return;
+  }
+
+  svgLine.setAttribute("stroke-width", "0.5");
 
   const [r, a] = cartesianToPolar(x - BOX_CENTER, y - BOX_CENTER);
   const [lineX, lineY] = polarToCartesian(r - 3, a);
@@ -54,8 +61,20 @@ const updateTime = () => {
   const secondsAngle = minuteAndSecondAngle * seconds;
 
   setPosition(hourText, hourLine, HOURS_RING, hoursAngle);
-  setPosition(minuteText, minuteLine, MINUTES_RING, minutesAngle);
-  setPosition(secondText, secondLine, SECONDS_RING, secondsAngle);
+  setPosition(
+    minuteText,
+    minuteLine,
+    MINUTES_RING,
+    minutesAngle,
+    minutesAngle === hoursAngle
+  );
+  setPosition(
+    secondText,
+    secondLine,
+    SECONDS_RING,
+    secondsAngle,
+    secondsAngle === minutesAngle || secondsAngle === hoursAngle
+  );
 
   hourText.textContent = hours.toString().padStart("2", "0");
   minuteText.textContent = minutes.toString().padStart("2", "0");
